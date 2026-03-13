@@ -1,0 +1,17 @@
+{
+  "name": "tuboleta-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "*",
+    "body-parser": "*",
+    "cors": "*",
+    "dotenv": "*",
+    "express": "*",
+    "speakeasy": "*",
+    "ws": "^8.19.0"
+  }
+}

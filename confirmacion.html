@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compra Confirmada · Tuboleta</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(135deg, #0066b3 0%, #004d8a 50%, #003366 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .success-container {
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header con check */
+    .success-header {
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .check-circle {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+    }
+
+    .check-circle svg {
+      width: 40px;
+      height: 40px;
+      stroke: white;
+      stroke-width: 3;
+    }
+
+    .success-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    .success-header p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .order-number {
+      display: inline-block;
+      background: #f0f0f0;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #333;
+      margin-top: 12px;
+    }
+
+    /* Ticket */
+    .ticket {
+      background: #fff;
+      border-radius: 0 0 20px 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .ticket-section {
+      padding: 24px;
+      border-bottom: 2px dashed #e0e0e0;
+    }
+
+    .ticket-section:last-child {
+      border-bottom: none;
+    }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-label {
+      color: #666;
+    }
+
+    .info-value {
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, #0066b3, #004d8a);
+    }
+
+    .total-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .total-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Footer */
+    .ticket-footer {
+      background: #f8f9fa;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .ticket-footer p {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .ticket-footer .email {
+      color: #0066b3;
+      font-weight: 600;
+    }
+
+    .home-btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 12px 32px;
+      background: #0066b3;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .home-btn:hover {
+      background: #004d8a;
+    }
+
+    /* Animacion check */
+    .check-circle svg {
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+      animation: drawCheck 0.5s ease forwards 0.3s;
+    }
+
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="success-container">
+  <div class="success-header">
+    <div class="check-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <h1>¡Pago Exitoso!</h1>
+    <p>Tu compra ha sido confirmada</p>
+    <span class="order-number" id="orderNumber">ORD-000000</span>
+  </div>
+
+  <div class="ticket">
+    <div class="ticket-section">
+      <div class="section-title">Evento</div>
+      <div class="info-row">
+        <span class="info-label">Nombre</span>
+        <span class="info-value" id="eventName">Classic Night</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Fecha</span>
+        <span class="info-value" id="eventDate">4 de Abril, 2026</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Ubicación</span>
+        <span class="info-value">Cartagena</span>
+      </div>
+    </div>
+
+    <div class="ticket-section">
+      <div class="section-title">Detalles de la Compra</div>
+      <div class="info-row">
+        <span class="info-label">Tipo de entrada</span>
+        <span class="info-value" id="ticketType">General</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Cantidad</span>
+        <span class="info-value" id="ticketQty">1 boleta</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Cargo por servicio</span>
+        <span class="info-value">Incluido</span>
+      </div>
+    </div>
+
+    <div class="ticket-section">
+      <div class="section-title">Datos del Pago</div>
+      <div class="info-row">
+        <span class="info-label">Titular</span>
+        <span class="info-value" id="cardName">---</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Tarjeta</span>
+        <span class="info-value" id="cardLast4">••••</span>
+      </div>
+    </div>
+
+    <div class="total-row">
+      <span class="total-label">Total Pagado</span>
+      <span class="total-value" id="totalAmount">$0</span>
+    </div>
+
+    <div class="ticket-footer">
+      <p>Se ha enviado un correo de confirmación a:</p>
+      <p class="email" id="userEmail">correo@ejemplo.com</p>
+      <a href="index.html" class="home-btn">Volver al inicio</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Cargar datos del localStorage
+  window.addEventListener('load', function() {
+    const monto = localStorage.getItem('pago_monto');
+    const detalle = localStorage.getItem('pago_detalle');
+    const evento = localStorage.getItem('pago_evento');
+    const nombre = localStorage.getItem('pago_nombre');
+    const email = localStorage.getItem('pago_email');
+    const tarjeta = localStorage.getItem('pago_tarjeta');
+
+    // Generar número de orden aleatorio
+    const orderNum = 'ORD-' + Math.floor(Math.random() * 900000 + 100000);
+    document.getElementById('orderNumber').textContent = orderNum;
+
+    // Monto
+    if (monto) {
+      document.getElementById('totalAmount').textContent = '$ ' + parseInt(monto).toLocaleString('es-CO');
+    }
+
+    // Detalle (tipo x cantidad)
+    if (detalle) {
+      const parts = detalle.split('x');
+      if (parts.length === 2) {
+        document.getElementById('ticketType').textContent = parts[0].trim();
+        const qty = parseInt(parts[1]);
+        document.getElementById('ticketQty').textContent = qty + ' boleta' + (qty > 1 ? 's' : '');
+      }
+    }
+
+    // Evento
+    if (evento) {
+      document.getElementById('eventName').textContent = evento;
+    }
+
+    // Nombre del titular
+    if (nombre) {
+      document.getElementById('cardName').textContent = nombre;
+    }
+
+    // Email
+    if (email) {
+      document.getElementById('userEmail').textContent = email;
+    }
+
+    // Últimos 4 dígitos de tarjeta
+    if (tarjeta) {
+      document.getElementById('cardLast4').textContent = '•••• ' + tarjeta;
+    }
+  });
+</script>
+
+</body>
+</html>

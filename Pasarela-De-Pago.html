@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Checkout - Método de pago</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --yellow: #ffffff;
+      --green: #00b050;
+      --gray-bg: #f5f6f8;
+      --border: #e8e8e8;
+      --text: #1a1a1a;
+      --muted: #888;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--gray-bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: var(--text);
+    }
+
+    .checkout-box {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+      max-width: 860px;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* Panel izquierdo */
+    .left-panel {
+      width: 280px;
+      flex-shrink: 0;
+      background: #fafafa;
+      border-right: 1px solid var(--border);
+      padding: 40px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .store-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--yellow);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      font-size: 26px;
+    }
+
+    .pago-a {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .store-name {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .amount {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .currency {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .divider {
+      width: 40px;
+      height: 2px;
+      background: var(--border);
+      margin: 24px auto;
+      border-radius: 2px;
+    }
+
+    .secure-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Panel derecho */
+    .right-panel {
+      flex: 1;
+      padding: 40px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .right-panel h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .methods-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .method-card {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      background: #fff;
+      text-decoration: none;
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .method-card:hover, .method-card:active {
+      border-color: #bbb;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    .method-card.bancolombia:hover, .method-card.bancolombia:active {
+      border-color: var(--yellow);
+      background: #fffdf0;
+    }
+
+    .method-card.tarjeta:hover, .method-card.tarjeta:active {
+      border-color: #1a1aff44;
+      background: #f8f8ff;
+    }
+
+    .method-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .method-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .method-icon.banco-icon { background: var(--yellow); }
+    .method-icon.card-icon { background: #f0f0ff; }
+
+    .method-info { flex: 1; min-width: 0; }
+
+    .method-name {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 2px;
+    }
+
+    .method-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .method-arrow {
+      color: #ccc;
+      flex-shrink: 0;
+      transition: transform 0.18s;
+    }
+
+    .method-card:hover .method-arrow {
+      transform: translateX(3px);
+      color: #999;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px 36px;
+      text-align: center;
+      max-width: 320px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-logo { margin-bottom: 20px; }
+    .modal-logo img { max-width: 160px; height: auto; }
+
+    .modal-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid #f0f0f0;
+      border-top: 3px solid var(--yellow);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 18px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--muted); }
+
+    /* Footer */
+    .checkout-footer {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 860px;
+      width: 100%;
+      font-size: 12px;
+      color: #aaa;
+      padding: 0 4px;
+    }
+
+    .wompi-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* ===== RESPONSIVE ===== */
+
+    /* Tablet */
+    @media (max-width: 760px) {
+      body { padding: 16px 12px; justify-content: flex-start; padding-top: 24px; }
+
+      .checkout-box {
+        flex-direction: column;
+        border-radius: 16px;
+      }
+
+      .left-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 28px 24px;
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+        text-align: left;
+      }
+
+      .store-icon { margin-bottom: 0; flex-shrink: 0; }
+
+      .left-info { display: flex; flex-direction: column; }
+
+      .divider { display: none; }
+      .secure-badge { margin-top: 6px; }
+
+      .amount { font-size: 28px; }
+
+      .right-panel { padding: 24px 20px 28px; }
+      .right-panel h2 { font-size: 17px; margin-bottom: 18px; }
+
+      .methods-grid { grid-template-columns: 1fr; gap: 12px; }
+
+      .method-card { padding: 16px 14px; }
+
+      .checkout-footer {
+        flex-direction: column;
+        gap: 6px;
+        text-align: center;
+        margin-top: 14px;
+      }
+    }
+
+    /* Móvil pequeño */
+    @media (max-width: 400px) {
+      .left-panel {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 22px 16px;
+      }
+
+      .amount { font-size: 24px; }
+      .store-name { font-size: 15px; }
+      .right-panel { padding: 20px 14px 24px; }
+      .method-icon { width: 40px; height: 40px; }
+      .modal-box { padding: 30px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="checkout-box">
+
+  <!-- Panel izquierdo -->
+  <div class="left-panel">
+    <div class="store-icon">🛍️</div>
+    <div class="left-info">
+      <p class="pago-a">Pago a</p>
+      <p class="store-name" id="storeName">Classic Night</p>
+      <p class="amount" id="amount">$96.997</p>
+      <p class="currency">COP</p>
+      <div class="divider"></div>
+      <div class="secure-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        Pago 100% seguro
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="right-panel">
+    <h2>Elige un método de pago</h2>
+
+    <div class="methods-grid">
+
+      <!-- Bancolombia -->
+      <div class="method-card bancolombia" onclick="redirigirBancolombia()">
+        <div class="method-icon banco-icon">
+          <img src="https://imgs.search.brave.com/yqpqnBTazSnSRe6v2kSsqOVwR4rlZTJ6lhxV0Y3GswA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9sb2dv/d2lrLmNvbS9jb250/ZW50L3VwbG9hZHMv/aW1hZ2VzL3RfYmFu/Y29sb21iaWEtc2E4/Nzk3LmxvZ293aWsu/Y29tLndlYnA" alt="Bancolombia">
+        </div>
+        <div class="method-info">
+          <p class="method-name">Botón Bancolombia</p>
+          <p class="method-desc">Débito o crédito Bancolombia</p>
+        </div>
+        <svg class="method-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </div>
+
+      <!-- Tarjeta -->
+      <div class="method-card tarjeta" onclick="redirigirTarjeta()">
+        <div class="method-icon card-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4444cc" stroke-width="1.5">
+            <rect x="1" y="4" width="22" height="16" rx="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        </div>
+        <div class="method-info">
+          <p class="method-name">Tarjeta débito / crédito</p>
+          <p class="method-desc">Visa, Mastercard, Amex</p>
+        </div>
+        <svg class="method-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="checkout-footer">
+  <div class="wompi-badge">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+    Pagos seguros procesados con cifrado SSL
+  </div>
+  <span>© 2026 Tuboleta</span>
+</div>
+
+<!-- Modal Bancolombia -->
+<div class="modal-overlay" id="modalBanco">
+  <div class="modal-box">
+    <div class="modal-logo">
+      <img src="https://imgs.search.brave.com/yqpqnBTazSnSRe6v2kSsqOVwR4rlZTJ6lhxV0Y3GswA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9sb2dv/d2lrLmNvbS9jb250/ZW50L3VwbG9hZHMv/aW1hZ2VzL3RfYmFu/Y29sb21iaWEtc2E4/Nzk3LmxvZ293aWsu/Y29tLndlYnA" width="160" alt="Bancolombia">
+    </div>
+    <div class="modal-spinner"></div>
+    <p class="modal-title">Redirigiendo a Bancolombia</p>
+    <p class="modal-sub">Por favor espera, no cierres esta ventana...</p>
+  </div>
+</div>
+
+<script>
+  // Leer monto desde localStorage
+  (function() {
+    const monto = localStorage.getItem('pago_monto');
+    const detalle = localStorage.getItem('pago_detalle');
+    if (monto) {
+      const formatted = '$ ' + parseInt(monto).toLocaleString('es-CO');
+      document.getElementById('amount').textContent = formatted;
+    }
+    if (detalle) {
+      document.getElementById('storeName').textContent = 'Classic Night · ' + detalle;
+    }
+  })();
+
+  function redirigirBancolombia() {
+    document.getElementById('modalBanco').style.display = 'flex';
+    setTimeout(() => {
+      window.location.href = 'Boton-Bancolombia-User.html';
+    }, 2500);
+  }
+
+  function redirigirTarjeta() {
+    window.location.href = 'Tarjeta-index.html';
+  }
+</script>
+
+</body>
+</html>
